@@ -23,7 +23,7 @@ docker network create hm-net
 
 使用下面的命令来安装MySQL：
 
-```Bash
+```虚拟机关机重启后启动sql:docker start mysql
 docker run -d \
   --name mysql \
   -p 3306:3306 \
