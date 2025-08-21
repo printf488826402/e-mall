@@ -1,6 +1,7 @@
 package com.hmall.cart.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -17,16 +18,15 @@ import com.hmall.common.utils.UserContext;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -44,7 +44,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 
     private final RestTemplate restTemplate;
 //    private final IItemService itemService;
-
+    private final DiscoveryClient discoveryClient;
     @Override
     public void addItem2Cart(CartFormDTO cartFormDTO) {
         // 1.获取登录用户
@@ -94,9 +94,19 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
 //        if (CollUtils.isEmpty(items)) {
 //            return;
 //        }
+        //2.1根据服务名称获取服务实例列表
+        //拉取实例列表
+        List<ServiceInstance> instances = discoveryClient.getInstances("item-service");
+        if (CollUtils.isEmpty(instances)){
+            return;
+        }
+        //2.2手写负载均衡，从服务列表中挑选一个服务实例
+        ServiceInstance instance = instances.get(RandomUtil.randomInt(instances.size()));
+
         //2.1利用RestTemplate发起http请求，得到http响应
         ResponseEntity<List<ItemDTO>> response = restTemplate.exchange(
-                "http://localhost:8081/items?ids={ids}",
+                //ip变更或多实例，这里就会出问题
+                instance.getUri()+"/items?ids={ids}",
                 HttpMethod.GET,
                 null,
                 /*List<ItemDTO>.class*/
