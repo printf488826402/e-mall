@@ -16,7 +16,7 @@ import com.hmall.common.utils.BeanUtils;
 import com.hmall.common.utils.CollUtils;
 import com.hmall.common.utils.UserContext;
 
-import com.hmall.api.client.dto.ItemDTO;
+import com.hmall.api.dto.ItemDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

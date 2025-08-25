@@ -120,3 +120,11 @@ docker ps
 如果启动失败，可通过docker logs 容器名查看日志排查问题（例如docker logs nacos）。
 
 defaultConfiguration = DefaultFeignConfig.class
+# 关闭所有Docker服务
+docker stop $(docker ps -q)
+# 如果未运行，启动Docker服务
+sudo systemctl start docker
+# 启动MySQL容器（假设容器名为mysql）
+docker start mysql
+# 启动Nacos容器（假设容器名为nacos）
+docker start nacos
